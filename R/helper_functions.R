@@ -1,14 +1,12 @@
 #' @title wide_to_long
 #'
-#' @description Provides an overview table for the time and scope conditions of
-#'     a data set
+#' @description Reshapes duration data from wide to long and generate relative ranks
 #'
-#' @param dat A data set object
-#' @param id Scope (e.g., country codes or individual IDs)
-#' @param time Time (e.g., time periods are given by years, months, ...)
+#' @param data The timestamp data in wide format
+#' @param id Respondent identifier
+#' @param cols The columns holding the duration data
 #'
-#' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#' @return A data.table object containing the columns id, item, duration, duration_rel, duration_decile
 #' @examples
 #' data(toydata)
 #' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
@@ -39,6 +37,7 @@ wide_to_long <- function(data, id, cols){
   # replace missings with median relative rank
   data_long[, duration_rel_median := median(duration_rel, na.rm = TRUE), id]
   data_long[, duration_rel := ifelse(is.na(duration_rel), duration_rel_median, duration_rel)]
+  data_long[, duration_rel_median := NULL]
 
   # calculate deciles
   data_long[, duration_decile := as.character(cut(duration_rel, breaks = seq(0, 1, 0.1))), item]
@@ -49,15 +48,12 @@ wide_to_long <- function(data, id, cols){
 
 #' @title long_to_wide
 #'
-#' @description Provides an overview table for the time and scope conditions of
-#'     a data set
+#' @description Reshapes duration data from long to wide for cluster analysis
 #'
-#' @param dat A data set object
-#' @param id Scope (e.g., country codes or individual IDs)
-#' @param time Time (e.g., time periods are given by years, months, ...)
+#' @param data The timestamp data in long format
+#' @param id Respondent identifier
 #'
-#' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#' @return A data.table object holding the relative ranks of durations in wide format
 #' @examples
 #' data(toydata)
 #' output_table <- overview_tab(dat = toydata, id = ccode, time = year)

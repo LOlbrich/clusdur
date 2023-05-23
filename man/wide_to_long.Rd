@@ -7,19 +7,17 @@
 wide_to_long(data, id, cols)
 }
 \arguments{
-\item{id}{Scope (e.g., country codes or individual IDs)}
+\item{data}{The timestamp data in wide format}
 
-\item{dat}{A data set object}
+\item{id}{Respondent identifier}
 
-\item{time}{Time (e.g., time periods are given by years, months, ...)}
+\item{cols}{The columns holding the duration data}
 }
 \value{
-A data frame object that contains a summary of a sample that
-    can later be converted to a TeX output using \code{overview_print}
+A data.table object containing the columns id, item, duration, duration_rel, duration_decile
 }
 \description{
-Provides an overview table for the time and scope conditions of
-    a data set
+Reshapes duration data from wide to long and generate relative ranks
 }
 \examples{
 data(toydata)
