@@ -1,7 +1,6 @@
 #' @title shiny_dur
 #'
-#' @description Provides an overview table for the time and scope conditions of
-#'     a data set
+#' @description A basic shiny app that shows the duration distribution for all columns by cluster
 #'
 #' @param dat A data set object
 #' @param id Scope (e.g., country codes or individual IDs)
