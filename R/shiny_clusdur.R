@@ -1,13 +1,10 @@
-#' @title shiny_dur
+#' @title shiny_clusdur
 #'
-#' @description A basic shiny app that shows the duration distribution for all columns by cluster
+#' @description A basic shiny app that shows the duration distribution for all columns by cluster.
 #'
-#' @param dat A data set object
-#' @param id Scope (e.g., country codes or individual IDs)
-#' @param time Time (e.g., time periods are given by years, months, ...)
+#' @param fit A "clusdur" object
 #'
-#' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#' @return A shiny app showing the distribution of durations faceted by cluster membership.
 #' @examples
 #' data(toydata)
 #' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
@@ -17,11 +14,11 @@
 #' @import ggplot2
 
 
-shiny_dur <- function(fit, facet = TRUE){
+shiny_clusdur <- function(fit, facet = TRUE){
 
   ui <- shiny::fluidPage(
 
-    shiny::titlePanel("Duration distributions for items"),
+    shiny::titlePanel("Duration distributions for screens"),
 
     shiny::sidebarLayout(
 

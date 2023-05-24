@@ -7,24 +7,48 @@
 clusdur(data, id, cols, method = "ward.D2", k = 2)
 }
 \arguments{
-\item{data}{A data set object}
+\item{data}{A data set in wide format containing the timestamp data.}
 
-\item{id}{Scope (e.g., country codes or individual IDs)}
+\item{id}{The respondent id.}
 
-\item{cols}{Time (e.g., time periods are given by years, months, ...)}
+\item{cols}{The columns containing the timestamps.}
 
-\item{method}{The linkage method (one of "complete", "ward.D2", "average)}
+\item{method}{The linkage method (see \code{\link[fastcluster:hclust]{fastcluster::hclust()}}). Default is "ward.D2".}
 
-\item{k}{Number of clusters}
+\item{k}{Number of clusters. Default is 2.}
 }
 \value{
-A clusdur object
+clusdur returns an object of class "clusdur". The function \code{\link[=summary]{summary()}} is used to obtain and print a summary of the cluster analysis. The function \code{\link[=plot]{plot()}} is used to obtain a plot of the composition of the clusters with regard to duration deciles for each screen. The function \code{\link[=shiny_clusdur]{shiny_clusdur()}} is used to obtain a simple shiny app that shows the duration distributions for each screen.
+
+\code{raw_data} The used data
+
+\code{long_data} The data in long format with relative durations and duration deciles
+
+\code{cluster_id} A dataframe holding the id, cluster id, and the cluster id with the cluster size
+
+\code{k} The number of clusters
+
+\code{method} The clustering method
+
+\code{tree} The fitted tree
 }
 \description{
-Provides an overview table for the time and scope conditions of
-    a data set
+Clusters respondents based on their timestamp data. The relative rank of the duration for each screen is used as input to the cluster analysis.
 }
 \examples{
-data(toydata)
-output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+# load simulated data
+data(dur_sim)
+
+# fit cluster analysis
+fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+
+# plot distribution across deciles
+plot(fit)
+
+# print summary of cluster analysis
+summary(fit)
+
+# run shiny app showing duration distributions by cluster
+shiny_clusdur(fit)
+
 }

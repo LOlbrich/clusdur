@@ -18,5 +18,11 @@ Imports:
 URL: https://github.com/LOlbrich/clusdur
 BugReports: https://github.com/LOlbrich/clusdur/issues
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

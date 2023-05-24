@@ -4,7 +4,7 @@
 \alias{print.summary.clusdur}
 \title{print.summary.clusdur}
 \usage{
-\method{print}{summary.clusdur}(x)
+\method{print}{summary.clusdur}(summary.clusdur)
 }
 \arguments{
 \item{dat}{A data set object}
@@ -15,13 +15,19 @@
 }
 \value{
 A data frame object that contains a summary of a sample that
-    can later be converted to a TeX output using \code{overview_print}
+can later be converted to a TeX output using \code{overview_print}
 }
 \description{
 Provides an overview table for the time and scope conditions of
-    a data set
+a data set
 }
 \examples{
-data(toydata)
-output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+# load simulated data
+data(dur_sim)
+
+# fit cluster analysis
+fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+
+# print summary of cluster analysis
+summary(fit)
 }

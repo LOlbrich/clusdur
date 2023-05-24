@@ -1,18 +1,36 @@
 #' @title clusdur
 #'
-#' @description Provides an overview table for the time and scope conditions of
-#'     a data set
+#' @description Clusters respondents based on their timestamp data. The relative rank of the duration for each screen is used as input to the cluster analysis.
 #'
-#' @param data A data set object
-#' @param id Scope (e.g., country codes or individual IDs)
-#' @param cols Time (e.g., time periods are given by years, months, ...)
-#' @param method The linkage method (one of "complete", "ward.D2", "average)
-#' @param k Number of clusters
+#' @param data A data set in wide format containing the timestamp data.
+#' @param id The respondent id.
+#' @param cols The columns containing the timestamps.
+#' @param method The linkage method (see [fastcluster::hclust()]). Default is "ward.D2".
+#' @param k Number of clusters. Default is 2.
 #'
-#' @return A clusdur object
+#' @return clusdur returns an object of class "clusdur". The function [clusdur::summary()] is used to obtain and print a summary of the cluster analysis. The function [clusdur::plot()] is used to obtain a plot of the composition of the clusters with regard to duration deciles for each screen. The function [clusdur::shiny_clusdur()] is used to obtain a simple shiny app that shows the duration distributions for each screen.
+#' @return `raw_data` The used data
+#' @return `long_data` The data in long format with relative durations and duration deciles
+#' @return `cluster_id` A dataframe holding the id, cluster id, and the cluster id with the cluster size
+#' @return `k` The number of clusters
+#' @return `method` The clustering method
+#' @return `tree` The fitted tree
 #' @examples
-#' data(toydata)
-#' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+#' # load simulated data
+#' data(dur_sim)
+#'
+#' # fit cluster analysis
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#'
+#' # plot distribution across deciles
+#' plot(fit)
+#'
+#' # print summary of cluster analysis
+#' summary(fit)
+#'
+#' # run shiny app showing duration distributions by cluster
+#' shiny_clusdur(fit)
+#'
 #' @export
 #' @import data.table
 #' @importFrom stats cutree
@@ -32,11 +50,13 @@ clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 
   df_long <- df_clust[df_long, on = id]
 
-  r <- list("raw_data" = data,
-            "long_data" = df_long,
-            "cluster_id" = df_clust,
-            "k" = k,
-            "method" = method)
+
+   r <- list("raw_data" = data,
+              "long_data" = df_long,
+              "cluster_id" = df_clust,
+              "k" = k,
+              "method" = method,
+              "tree" = cluster_solution)
 
   class(r) <- c("list", "clusdur")
 
@@ -54,10 +74,16 @@ clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 #' @param time Time (e.g., time periods are given by years, months, ...)
 #'
 #' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#'     can later be converted to a TeX output using `overview_print`
 #' @examples
-#' data(toydata)
-#' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+#' # load simulated data
+#' data(dur_sim)
+#'
+#' # fit cluster analysis
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#'
+#' # plot distribution across deciles
+#' plot(fit)
 #' @export
 #' @import data.table
 #' @import ggplot2
@@ -88,22 +114,29 @@ plot.clusdur <- function(fit){
 #' @param time Time (e.g., time periods are given by years, months, ...)
 #'
 #' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#'     can later be converted to a TeX output using `overview_print`
 #' @examples
-#' data(toydata)
-#' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+#' # load simulated data
+#' data(dur_sim)
+#'
+#' # fit cluster analysis
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#'
+#' # print summary of cluster analysis
+#' summary(fit)
 #' @export
 #' @import data.table
 
 
 summary.clusdur <- function(fit){
 
-  n_obs <- nrow(fit$df_clust)
+  n_obs <- nrow(fit$cluster_id)
   n_vars <- length(unique(fit$long_data$item))
   k <- fit$k
   method <- fit$method
   cluster_size <- fit$cluster_id[, .N, cluster]
   mean_rank <- fit$long_data[, mean(duration_rel), cluster]
+  setnames(mean_rank, 2, "Average rank")
 
   out <- list("n_obs" = n_obs,
               "n_vars" = n_vars,
@@ -128,32 +161,38 @@ summary.clusdur <- function(fit){
 #' @param time Time (e.g., time periods are given by years, months, ...)
 #'
 #' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using \code{overview_print}
+#'     can later be converted to a TeX output using `overview_print`
 #' @examples
-#' data(toydata)
-#' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
+#' # load simulated data
+#' data(dur_sim)
+#'
+#' # fit cluster analysis
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#'
+#' # print summary of cluster analysis
+#' summary(fit)
 #' @export
 #' @import data.table
 
 
-print.summary.clusdur <- function(x){
+print.summary.clusdur <- function(summary.clusdur){
 
   cat("\n")
-  cat("Sequence-cluster analysis of item latencies")
+  cat("Cluster analysis of screen durations")
   cat("\n\n")
-  cat("Number of observations: ", x$n_obs)
+  cat("Number of observations: ", summary.clusdur$n_obs)
   cat("\n")
-  cat("Number of items: ", x$n_vars)
+  cat("Number of items: ", summary.clusdur$n_vars)
   cat("\n")
-  cat("Number of clusters: ", x$k)
+  cat("Number of clusters: ", summary.clusdur$k)
   cat("\n\n")
-  cat("Clustering method: ", x$method)
+  cat("Clustering method: ", summary.clusdur$method)
   cat("\n\n")
   cat("Cluster sizes")
   cat("\n")
-  print(x$cluster_size, row.names = FALSE)
+  print(summary.clusdur$cluster_size, row.names = FALSE)
   cat("\n\n")
   cat("Average relative rank within clusters:")
   cat("\n")
-  print(x$mean_rank, row.names = FALSE)
+  print(summary.clusdur$mean_rank, row.names = FALSE)
 }
