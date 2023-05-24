@@ -33,31 +33,63 @@
 #'
 #' @export
 #' @import data.table
-#' @importFrom stats cutree
-
+#' @import fastcluster
+#' @importFrom stats cutree dist
 
 clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 
+  # check for errors to breakoff as early as possible
+
+  # check if data is a data.frame
+  if(!(is.data.frame(data))){
+    stop("data is not a data.frame")
+  }
+
+  # check correct method is selected
+  if(!(method %in% c("single", "complete", "average", "mcquitty", "ward.D", "ward.D2", "centroid", "median"))){
+    stop("Please select one of single, complete, average, mcquitty, ward.D, ward.D2, centroid or median as method.")
+  }
+
+  # check if id is in dataframe
+  if(!(id %in% colnames(data))){
+    stop("Provided id is not a column name in data.")
+  }
+
+  # check is k is an integer
+  if(!is.numeric(k) | abs(k) - round(k) > .Machine$double.eps^0.5){
+    stop("k is not a whole number.")
+  }
+
+  # reshape data from wide to long
   df_long <- wide_to_long(data, id, cols)
 
+  # check for negative durations
+  if(min(df_long$duration < 0)){
+    stop("Dataframe contains negative durations.")
+  }
+
+  # reshape from long to wide
   df_wide <- long_to_wide(df_long, id)
 
+  # run cluster analysis
   cluster_solution <- fastcluster::hclust(dist(df_wide[, 2:ncol(df_wide)]), method = method)
 
+  # store id, cluster, and cluster label in data.table
   df_clust <- df_wide[, cluster := stats::cutree(cluster_solution, k = k)][, c(id, "cluster"), with = FALSE]
-
   df_clust[, cluster_label := paste0("Cluster ", cluster, " (N = ", .N, ")"), cluster]
 
+  # merge df_clost to df_long
   df_long <- df_clust[df_long, on = id]
 
-
-   r <- list("raw_data" = data,
+  # store results in list
+  r <- list("raw_data" = data,
               "long_data" = df_long,
               "cluster_id" = df_clust,
               "k" = k,
               "method" = method,
               "tree" = cluster_solution)
 
+  # save list as cludur class
   class(r) <- c("list", "clusdur")
 
   return(r)
@@ -69,12 +101,9 @@ clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 #' @description Provides an overview table for the time and scope conditions of
 #'     a data set
 #'
-#' @param dat A data set object
-#' @param id Scope (e.g., country codes or individual IDs)
-#' @param time Time (e.g., time periods are given by years, months, ...)
+#' @param fit A clusdur object
 #'
-#' @return A data frame object that contains a summary of a sample that
-#'     can later be converted to a TeX output using `overview_print`
+#' @return A ggplot object`
 #' @examples
 #' # load simulated data
 #' data(dur_sim)
@@ -87,14 +116,21 @@ clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 #' @export
 #' @import data.table
 #' @import ggplot2
+#' @importFrom scales pretty_breaks
+#' @importFrom grDevices grey.colors
 
 
 plot.clusdur <- function(fit){
 
+  # check if fit is a clusdur object
+  if(!is(fit, "clusdur")){
+    stop("fit is not a clusdur object")
+  }
+
   ggplot2::ggplot(data = fit$long_data,
        aes(fill = duration_decile, x = item_order)) +
   geom_bar(position = "fill") +
-  scale_fill_manual(values = c("black", grey.colors(9), "white")) +
+  scale_fill_manual(values = c("black", grDevices::grey.colors(9), "white")) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   labs(y = "Proportion", x = "Order of screens", fill = "Decile") +
@@ -129,6 +165,11 @@ plot.clusdur <- function(fit){
 
 
 summary.clusdur <- function(fit){
+
+  # check if fit is a clusdur object
+  if(!is(fit, "clusdur")){
+    stop("fit is not a clusdur object")
+  }
 
   n_obs <- nrow(fit$cluster_id)
   n_vars <- length(unique(fit$long_data$item))

@@ -12,6 +12,7 @@
 #' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
 #' @export
 #' @import data.table
+#' @importFrom stats median
 
 # generate long dataset
 wide_to_long <- function(data, id, cols){
@@ -20,10 +21,7 @@ wide_to_long <- function(data, id, cols){
   df <- setDT(data)
 
   # reshape data to long format
-  data_long <- data.table::melt(df, id.vars = c(id), measure = cols, value.name = "duration", variable.name = "item")
-
-  # replace zeroes with NA
-  data_long[, duration := fifelse(duration <= 0, NA_real_, duration)]
+  data_long <- data.table::melt(df, id.vars = c(id), measure.vars = cols, value.name = "duration", variable.name = "item")
 
   # count number of valid latencies by item
   data_long[, item_count := sum(!is.na(duration)), item]
@@ -35,7 +33,7 @@ wide_to_long <- function(data, id, cols){
   data_long[, duration_rel := frank(duration, na.last = "keep") / item_count, item]
 
   # replace missings with median relative rank
-  data_long[, duration_rel_median := median(duration_rel, na.rm = TRUE), id]
+  data_long[, duration_rel_median := stats::median(duration_rel, na.rm = TRUE), id]
   data_long[, duration_rel := ifelse(is.na(duration_rel), duration_rel_median, duration_rel)]
   data_long[, duration_rel_median := NULL]
 
@@ -43,6 +41,7 @@ wide_to_long <- function(data, id, cols){
   data_long[, duration_decile := as.character(cut(duration_rel, breaks = seq(0, 1, 0.1))), item]
   data_long[, duration_decile := ifelse(is.na(duration), "missing", duration_decile), item]
 
+  # return long data
   data_long
 }
 
@@ -59,11 +58,12 @@ wide_to_long <- function(data, id, cols){
 #' output_table <- overview_tab(dat = toydata, id = ccode, time = year)
 #' @export
 #' @import data.table
+#' @importFrom stats as.formula
 
 # calculate relative frequencies
 long_to_wide <- function(data, id){
   # generate wide dataset
-  dcast(data, as.formula(paste0(as.character(id), "~ item")), value.var = "duration_rel")
+  data.table::dcast(data, stats::as.formula(paste0(as.character(id), "~ item")), value.var = "duration_rel")
 
 }
 

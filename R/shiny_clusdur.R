@@ -16,6 +16,12 @@
 
 shiny_clusdur <- function(fit, facet = TRUE){
 
+  # check if fit is a clusdur object
+  if(!is(fit, "clusdur")){
+    stop("fit is not a clusdur object")
+  }
+
+
   ui <- shiny::fluidPage(
 
     shiny::titlePanel("Duration distributions for screens"),
