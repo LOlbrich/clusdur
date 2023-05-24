@@ -1,8 +1,8 @@
 Package: clusdur
 Type: Package
-Title: What the Package Does (Title Case)
+Title: clusdur: Clustering timestamp data to identify inattentive respondents
 Version: 0.1.0
-Author: person("Lukas", "Olbrich", email = "lukas-olbrich@outlook.de",
+Authors@R: person("Lukas", "Olbrich", email = "lukas-olbrich@outlook.de",
   role = c("aut", "cre"))
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -13,6 +13,7 @@ LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
     data.table,
+    fastcluster,
     ggplot2,
     shiny
 URL: https://github.com/LOlbrich/clusdur
