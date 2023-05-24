@@ -66,7 +66,7 @@ shiny_clusdur <- function(fit, facet = TRUE){
 
 
       if(facet){
-        ggplot(data = plot_data_item,
+        ggplot2::ggplot(data = plot_data_item,
                aes(x = duration)) +
           geom_histogram(binwidth = 1) +
           xlim(c(0, input$max_x)) +
@@ -76,7 +76,7 @@ shiny_clusdur <- function(fit, facet = TRUE){
                 strip.text = element_text(colour = 'black'))
       } else{
         plot_data_cluster <- plot_data_item[cluster == input$select_cluster,]
-        ggplot(data = plot_data_cluster,
+        ggplot2::ggplot(data = plot_data_cluster,
                aes(x = duration)) +
           geom_histogram(binwidth = 1) +
           xlim(c(0, input$max_x)) +

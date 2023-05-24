@@ -20,7 +20,7 @@
 #' data(dur_sim)
 #'
 #' # fit cluster analysis
-#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:31, method = "ward.D2", k = 2)
 #'
 #' # plot distribution across deciles
 #' plot(fit)
@@ -109,7 +109,7 @@ clusdur <- function(data, id, cols, method = "ward.D2", k = 2){
 #' data(dur_sim)
 #'
 #' # fit cluster analysis
-#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:31, method = "ward.D2", k = 2)
 #'
 #' # plot distribution across deciles
 #' plot(fit)
@@ -156,7 +156,7 @@ plot.clusdur <- function(fit){
 #' data(dur_sim)
 #'
 #' # fit cluster analysis
-#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:31, method = "ward.D2", k = 2)
 #'
 #' # print summary of cluster analysis
 #' summary(fit)
@@ -208,7 +208,7 @@ summary.clusdur <- function(fit){
 #' data(dur_sim)
 #'
 #' # fit cluster analysis
-#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+#' fit <- clusdur(data = dur_sim, id = "id", cols = 2:31, method = "ward.D2", k = 2)
 #'
 #' # print summary of cluster analysis
 #' summary(fit)

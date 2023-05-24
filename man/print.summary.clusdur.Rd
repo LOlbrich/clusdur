@@ -26,7 +26,7 @@ a data set
 data(dur_sim)
 
 # fit cluster analysis
-fit <- clusdur(data = dur_sim, id = "id", cols = 2:51, method = "ward.D2", k = 2)
+fit <- clusdur(data = dur_sim, id = "id", cols = 2:31, method = "ward.D2", k = 2)
 
 # print summary of cluster analysis
 summary(fit)
